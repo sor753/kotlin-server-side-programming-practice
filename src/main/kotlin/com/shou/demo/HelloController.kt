@@ -1,6 +1,7 @@
 package com.shou.demo
 
 import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Component
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -9,6 +10,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+
+
+interface Greeter {
+    fun sayHello(name: String): String
+}
+
+@Component
+class GreeterImpl : Greeter {
+    override fun sayHello(name: String)="Hello, $name!"
+}
 
 @Controller
 class HelloController {
@@ -21,7 +32,9 @@ class HelloController {
 
 @RestController
 @RequestMapping("greeter")
-class GreeterController {
+class GreeterController (
+    private val greeter: Greeter
+) {
     @GetMapping("/hello")
     fun hello(@RequestParam("name") name: String): HelloResponse {
         return HelloResponse("Hello, $name!")
@@ -35,6 +48,11 @@ class GreeterController {
     @PostMapping("/hello")
     fun helloByPost(@RequestBody request: HelloRequest): HelloResponse {
         return HelloResponse("Hello, ${request.name}!")
+    }
+
+    @GetMapping("/hello/byservice/{name}")
+    fun helloByService(@PathVariable("name") name: String): HelloResponse {
+        return HelloResponse(greeter.sayHello(name))
     }
 }
 
