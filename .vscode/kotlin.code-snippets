@@ -1,0 +1,12 @@
+{
+  "Kotlin package declaration": {
+    "scope": "kotlin",
+    "prefix": "pkg",
+    "body": [
+      "package ${1:com.shou.demo}",
+      "",
+      "$0"
+    ],
+    "description": "package宣言を挿入する（VS Codeには New Kotlin File 相当の自動package挿入機能が無いため）"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "demo (Spring Boot / Kotlin)",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "vscode",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  "mounts": [
+    "source=demo-gradle-cache,target=/home/vscode/.gradle,type=volume"
+  ],
+
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Spring Boot",
+      "onAutoForward": "notify"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle",
+        "fwcd.kotlin",
+        "vmware.vscode-spring-boot",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current"
+      }
+    }
+  },
+
+  "postCreateCommand": "./gradlew --version"
+}
