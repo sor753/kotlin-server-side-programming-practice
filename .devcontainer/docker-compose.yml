@@ -1,5 +1,5 @@
 services:
-  app:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,6 +9,20 @@ services:
     command: sleep infinity
     depends_on:
       - mysql
+
+  frontend:
+    image: node:20-bookworm
+    working_dir: /workspace
+    environment:
+      # 古いwebpack3/babel6構成がNode17+のOpenSSL3と非互換のため、レガシープロバイダーを使用する
+      NODE_OPTIONS: --openssl-legacy-provider
+      HOST: 0.0.0.0
+    volumes:
+      - ../frontend:/workspace:cached
+      - frontend-node-modules:/workspace/node_modules
+    ports:
+      - "8081:8081"
+    command: sh -c "npm install && npm run dev"
 
   mysql:
     image: mysql:8.0
@@ -28,3 +42,4 @@ services:
 volumes:
   demo-gradle-cache:
   mysql-data:
+  frontend-node-modules:
