@@ -1,3 +1,8 @@
 spring:
   application:
     name: demo
+  datasource:
+    url: jdbc:mysql://mysql:3306/demo
+    username: user
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
