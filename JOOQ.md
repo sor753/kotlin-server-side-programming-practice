@@ -74,12 +74,14 @@ dependencyManagement {
 
 ### スキーマを変更したら
 
-`user.sql` などテーブル定義を変更した場合、以下の手順で反映します。
+テーブル定義は `.devcontainer/mysql/initdb.d/` の生SQLではなく、**Flywayのマイグレーション**（`src/main/resources/db/migration/`）で管理しています。詳細な運用方法は [Flywayを参照](README.md#flyway)。
 
-1. MySQLのデータボリュームを初期化（`docker compose down -v` 等。詳細は [README.md](README.md) 参照）してスキーマ変更を反映
-2. `./gradlew generateJooq` を再実行してコードを再生成
+1. `src/main/resources/db/migration/` に新しいマイグレーションファイル（`V3__xxx.sql` など）を追加
+2. `./gradlew generateJooq` を実行 — 内部で `flywayMigrate` が先に走ってスキーマへ反映され、その最新スキーマからコードが再生成される
 
 生成物 (`build/generated-src/jooq/main`) はビルド成果物なので Git 管理対象外です（`build/` は `.gitignore` 済み）。
+
+`excludes = "flyway_schema_history"` を `jooq { database { } }` に設定しているため、Flywayの内部管理テーブルはコード生成対象になりません。
 
 ## 生成されるコードの例
 
@@ -194,7 +196,7 @@ class UserController(private val dsl: DSLContext) {
 data class UserResponse(val id: Int, val name: String, val age: Int, val profile: String)
 ```
 
-`record.id` / `record.name` などは `UserRecord`（`com.shou.demo.jooq.tables.records.UserRecord`）のプロパティで、`user.sql` のカラム定義（`id`, `name`, `age`, `profile`）にそのまま対応しています。
+`record.id` / `record.name` などは `UserRecord`（`com.shou.demo.jooq.tables.records.UserRecord`）のプロパティで、`V1__create_user_table.sql` のカラム定義（`id`, `name`, `age`, `profile`）にそのまま対応しています。
 
 ## 参考リンク
 

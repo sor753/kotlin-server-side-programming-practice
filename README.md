@@ -50,13 +50,36 @@ mysql -h mysql -P 3306 -u user -ppassword demo
 
 #### 初期データ投入用 SQL の置き場
 
-`.devcontainer/mysql/initdb.d/` に `.sql`（または `.sh`）ファイルを置くと、MySQL公式イメージの初期化機構により、**`mysql-data` ボリュームが空の状態でコンテナが初回起動したときにファイル名の昇順で自動実行**されます。
+`.devcontainer/mysql/initdb.d/` は、MySQL公式イメージの初期化機構（`mysql-data` ボリュームが空の状態でコンテナが初回起動したときに、置かれた `.sql`/`.sh` ファイルをファイル名の昇順で自動実行する仕組み）用のディレクトリです。
 
-例: `01_schema.sql`、`02_seed.sql` のように番号を振ると実行順を制御できます。
+**テーブルスキーマとシードデータは Flyway で管理**しているため、現在このディレクトリは空です（DBユーザー追加など、マイグレーション対象外の初期化が必要になったときに使ってください）。スキーマ変更やシードデータの追加は [Flyway](#flyway) セクションを参照してください。
 
-> 一度データボリュームが作成されると、SQLファイルを追加してもコンテナの再起動だけでは反映されません。反映するには `docker compose down -v`（または `mysql-data` ボリュームの削除）でデータを初期化してから再作成してください。
+### Flyway
 
-初期化スクリプトの先頭には `SET NAMES utf8mb4;` を必ず入れてください。`docker-entrypoint-initdb.d` のスクリプトを実行する `mysql` クライアントは接続文字コードがデフォルトのままだと、日本語などのマルチバイト文字列を**バイト数**で `VARCHAR` の上限判定してしまい、文字数は上限内でも `ERROR 1406: Data too long for column` になることがあります（`SET NAMES utf8mb4;` でセッションの文字コードを明示すると解決します）。
+DBスキーマのバージョン管理に [Flyway](https://flywaydb.org/) を導入しています。
+
+マイグレーションファイルは `src/main/resources/db/migration/` に `V<番号>__<説明>.sql` の形式で置きます。
+
+| ファイル | 内容 |
+| --- | --- |
+| `V1__create_user_table.sql` | `user` テーブルの作成 |
+| `V2__seed_users.sql` | サンプルデータの投入 |
+
+マイグレーションは `spring-boot-starter`（Spring Boot の Flyway自動構成）により、**アプリ起動時に自動的に最新まで適用**されます。手動で適用したい場合は以下を実行します。
+
+```shell
+./gradlew flywayMigrate
+```
+
+> 公式の `flyway` Gradleプラグインは Gradle 9 と非互換（削除済みの内部APIに依存）だったため、`flyway-commandline` を `JavaExec` で直接実行する自前タスクとして実装しています。
+
+jOOQのコード生成（`generateJooq`）は、このタスクに依存しているため、**常にマイグレーション適用後の最新スキーマを読み取って生成**されます。
+
+新しいマイグレーションを追加した場合、jOOQの生成コードを最新化するには以下を実行してください。
+
+```shell
+./gradlew generateJooq
+```
 
 ### jOOQ
 
