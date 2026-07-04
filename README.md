@@ -58,6 +58,16 @@ mysql -h mysql -P 3306 -u user -ppassword demo
 
 初期化スクリプトの先頭には `SET NAMES utf8mb4;` を必ず入れてください。`docker-entrypoint-initdb.d` のスクリプトを実行する `mysql` クライアントは接続文字コードがデフォルトのままだと、日本語などのマルチバイト文字列を**バイト数**で `VARCHAR` の上限判定してしまい、文字数は上限内でも `ERROR 1406: Data too long for column` になることがあります（`SET NAMES utf8mb4;` でセッションの文字コードを明示すると解決します）。
 
+### jOOQ
+
+DBスキーマから型安全なKotlinコードを自動生成する [jOOQ](https://www.jooq.org/) を導入しています。基本的な使い方やこのプロジェクトでの具体例は [JOOQ.md](JOOQ.md) を参照してください。
+
+コード生成には起動中のMySQL（`mysql:3306`）への接続が必要なため、Dev Container内で実行してください。
+
+```shell
+./gradlew generateJooq
+```
+
 ### コード変更時の自動リスタート（DevTools）
 
 `spring-boot-devtools` を導入済みのため、以下の手順で保存時に自動リスタートできます。

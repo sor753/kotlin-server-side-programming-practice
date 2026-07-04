@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ../..:/workspace:cached
+      - ..:/workspace:cached
       - demo-gradle-cache:/home/vscode/.gradle
     command: sleep infinity
     depends_on:
