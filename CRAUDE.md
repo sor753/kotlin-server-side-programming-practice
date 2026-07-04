@@ -1,0 +1,1 @@
+AGENTS.md 参照
