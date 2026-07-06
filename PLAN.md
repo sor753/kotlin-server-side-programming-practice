@@ -58,28 +58,27 @@ com.shou.demo
 
 | フェーズ | 内容 | 状態 |
 | --- | --- | --- |
-| 1 | 検索系機能（一覧取得・詳細取得） | [ ] 未着手 |
+| 1 | 検索系機能（一覧取得・詳細取得） | [ ] 対応中 |
 | 2 | 更新系機能（登録・更新・削除） | [ ] 未着手 |
 | 3 | Spring Security による認証・認可 | [ ] 未着手 |
 | 4 | 貸出・返却機能 | [ ] 未着手 |
 | 5 | Spring AOP でログ出力 | [ ] 未着手 |
 | 6 | JUnitで単体テスト | [ ] 未着手 |
 
-### フェーズ1: 検索系機能（一覧取得・詳細取得） `[ ] 未着手`
+### フェーズ1: 検索系機能（一覧取得・詳細取得） `[ ] 対応中`
 
 認証機構より先に実装するため、この時点では未認証でアクセス可能な状態でよい。
 
 - **Domain**
-  - [ ] `domain/book/Book.kt`: `Book(id, title, author, releaseDate)`
-  - [ ] `domain/rental/Rental.kt`: `Rental(id, userId, bookId, rentalDatetime, returnDeadline)`
-  - [ ] `domain/book/BookRepository.kt`: `findAll(): List<Book>`, `findById(id): Book?`
-  - [ ] `domain/rental/RentalRepository.kt`: `findActiveByBookId(bookId): Rental?`, `findActiveByBookIds(bookIds): List<Rental>`（一覧のN+1回避用）
+  - [x] `domain/book/Book.kt`: `Book(id, title, author, releaseDate)`
+  - [x] `domain/rental/Rental.kt`: `Rental(id, bookId, userId, rentalDatetime, returnDeadline)`
+  - [x] `domain/book/BookWithRental.kt`: `BookWithRental(book: Book, rental: Rental?)`（`isRental` は `rental != null` から導出）
+  - [x] `domain/book/BookRepository.kt`: `findAllWithRental(): List<BookWithRental>`（一覧取得用。詳細取得用の `findByIdWithRental` は一覧取得側が完成してから別途追加する）
 - **Infrastructure**
-  - [ ] `infrastructure/book/BookRepositoryImpl.kt`（jOOQ `BOOK` テーブル操作）
-  - [ ] `infrastructure/rental/RentalRepositoryImpl.kt`（jOOQ `RENTAL` テーブル操作。「現在貸出中」は `return_deadline` 等では判定できないため、返却時にレコード自体を削除する設計 ―後述の削除方式を参照― であれば「rentalテーブルに存在する = 貸出中」で判定できる）
+  - [x] `infrastructure/book/BookRepositoryImpl.kt`（jOOQ で `book LEFT JOIN rental` を1クエリで取得し `BookWithRental` に変換する。`RentalRepository`/`RentalRepositoryImpl` はフェーズ4まで不要）
 - **Usecase**
   - [ ] `usecase/book/FindBookListUsecase.kt`: 全書籍＋貸出状況を取得し `List<BookListItem>` を返す
-  - [ ] `usecase/book/FindBookDetailUsecase.kt`: 1件の書籍＋貸出情報を取得
+  - [ ] `usecase/book/FindBookDetailUsecase.kt`: 1件の書籍＋貸出情報を取得（`BookRepository.findByIdWithRental` の追加が前提。一覧取得側を先に完成させてから着手）
 - **Presentation**
   - [ ] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
   - [ ] レスポンス用クラス（`BookListResponse`, `BookListItem`, `BookDetailResponse`, `RentalInfoResponse`）
@@ -105,9 +104,9 @@ com.shou.demo
 
 ### フェーズ4: 貸出・返却機能 `[ ] 未着手`
 
-貸出中の判定方式を先に決める必要がある（下記「要検討事項」参照）。
+貸出中の判定は「返却時にレコードを削除し、レコードが存在する＝貸出中」という方式で確定済み（`BookWithRental(rental: Rental?)` の設計を参照）。
 
-- [ ] **Domain**: `RentalRepository` に `save(rental)`, `deleteByBookId(bookId)` を追加（貸出＝作成、返却＝削除という設計を仮定）
+- [ ] **Domain**: `domain/rental/RentalRepository.kt` を新規作成し `save(rental)`, `deleteByBookId(bookId)` を定義
 - [ ] **Infrastructure**: `RentalRepositoryImpl` に対応する実装を追加
 - [ ] **Usecase**: `StartRentalUsecase`（ログイン中ユーザーIDを使って貸出登録。返却期限の計算ルールも実装）, `EndRentalUsecase`
 - [ ] **Presentation**: `presentation/rental/RentalController.kt`: `POST /rental/start`, `DELETE /rental/end/{id}`
@@ -120,8 +119,11 @@ com.shou.demo
 
 - [ ] 各層（Usecase中心）に対するテストを追加。Repositoryは実DBを使う結合テスト、Usecaseはリポジトリをモック化した単体テストを想定
 
+## 決定事項
+
+- **貸出状態の判定方法**: 返却時に該当 `rental` レコードを `DELETE` し、「レコードが存在する＝貸出中」とする方式に決定（`domain/book/BookWithRental.kt` の `rental: Rental?` として実装済み）
+
 ## 要検討事項（実装時に判断が必要）
 
-- **貸出状態の判定方法**: `rental` テーブルに「返却済みかどうか」を表すカラムが無い。案A: 返却時に該当レコードを`DELETE`し「レコードが存在する＝貸出中」とする（テーブル定義上はこちらが自然）。案B: `returned_at` 等のカラムを追加するマイグレーションを足す。どちらにするかで貸出関連のクエリ設計が変わる
 - **返却期限の算出ルール**: `return_deadline` をどう計算するか（例: 貸出日+2週間など）がAGENTS.mdに明記されていない
 - **ログインの失敗時レスポンス**: フロントエンド側は失敗時のハンドリングをしていない（`then`のみ）ため、エラー時のステータスコード等は実装側で自由に決めてよい
