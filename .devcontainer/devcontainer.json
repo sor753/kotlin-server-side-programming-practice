@@ -27,7 +27,8 @@
         "vscjava.vscode-gradle",
         "fwcd.kotlin",
         "vmware.vscode-spring-boot",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "emeraldwalk.RunOnSave"
       ],
       "settings": {
         "java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current"

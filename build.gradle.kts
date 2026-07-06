@@ -150,6 +150,26 @@ tasks.named("generateJooq") {
 	dependsOn("flywayMigrate")
 }
 
+// 公式の ktlint Gradle プラグイン(org.jlleitschuh.gradle.ktlint)や、Maven Central上の分割モジュール
+// (ktlint-rule-engine-core 等)をGradleで組み合わせる方式は、バージョン番号が同じでもABIが一致せず
+// NoSuchFieldError: HEADER_KEYWORD になったため、Dockerfileで導入した公式配布の単体実行可能jar
+// （ktlintコマンド）を直接呼び出す
+tasks.register<Exec>("ktlintCheck") {
+	commandLine("ktlint", "src/**/*.kt")
+}
+
+tasks.register<Exec>("ktlintFormat") {
+	commandLine("ktlint", "-F", "src/**/*.kt")
+}
+
+// detektのGradleプラグイン経由だと、プロジェクトのKotlinバージョン(2.3.21)がGradleの依存関係解決で
+// detekt内部のkotlin-compiler-embeddableに波及し「detekt was compiled with Kotlin 2.0.10 but is
+// currently running with 2.3.21」という非互換エラーになるため、Dockerfileで導入した単体jarを
+// 依存関係を分離した状態で直接実行する
+tasks.register<Exec>("detekt") {
+	commandLine("detekt", "--input", "src/main/kotlin", "--build-upon-default-config")
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
