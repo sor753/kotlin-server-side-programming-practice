@@ -77,7 +77,7 @@ com.shou.demo
 - **Infrastructure**
   - [x] `infrastructure/book/BookRepositoryImpl.kt`（jOOQ で `book LEFT JOIN rental` を1クエリで取得し `BookWithRental` に変換する。`RentalRepository`/`RentalRepositoryImpl` はフェーズ4まで不要）
 - **Usecase**
-  - [ ] `usecase/book/FindBookListUsecase.kt`: 全書籍＋貸出状況を取得し `List<BookListItem>` を返す
+  - [x] `usecase/book/FindBookListUsecase.kt`: 全書籍＋貸出状況を取得し `List<BookListItem>` を返す
   - [ ] `usecase/book/FindBookDetailUsecase.kt`: 1件の書籍＋貸出情報を取得（`BookRepository.findByIdWithRental` の追加が前提。一覧取得側を先に完成させてから着手）
 - **Presentation**
   - [ ] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
