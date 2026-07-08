@@ -9,6 +9,7 @@ import com.shou.demo.domain.rental.Rental
 import com.shou.demo.jooq.tables.references.BOOK
 import com.shou.demo.jooq.tables.references.RENTAL
 import org.jooq.DSLContext
+import org.jooq.Record
 import org.springframework.stereotype.Repository
 
 // InfrastructureのBean。Domainの BookRepository インターフェースの実装
@@ -26,28 +27,35 @@ class JooqBookRepositoryImpl(
             .leftJoin(RENTAL)
             .on(BOOK.ID.eq(RENTAL.BOOK_ID))
             // 1行(Record)ずつ、任意の型(ここではBookWithRental)に変換する
-            .fetch { record ->
-                BookWithRental(
-                    // book側のカラムはNOT NULL制約があるためnullになり得ない → !! で非null型に変換
-                    book =
-                        Book(
-                            id = record[BOOK.ID]!!,
-                            title = record[BOOK.TITLE]!!,
-                            author = record[BOOK.AUTHOR]!!,
-                            releaseDate = record[BOOK.RELEASE_DATE]!!,
-                        ),
-                    // RENTAL.IDがnull（LEFT JOINでマッチする貸出レコードが無い）なら
-                    // rentalはnullのまま。存在する場合だけRentalを組み立てる
-                    rental =
-                        record[RENTAL.ID]?.let { rentalId ->
-                            Rental(
-                                id = rentalId,
-                                bookId = record[RENTAL.BOOK_ID]!!,
-                                userId = record[RENTAL.USER_ID]!!,
-                                rentalDatetime = record[RENTAL.RENTAL_DATETIME]!!,
-                                returnDeadline = record[RENTAL.RETURN_DEADLINE]!!,
-                            )
-                        },
-                )
-            }
+            .fetch(::toBookWithRental)
+
+    override fun findByIdWithRental(id: Long): BookWithRental? =
+        dsl
+            .select()
+            .from(BOOK)
+            .leftJoin(RENTAL)
+            .on(BOOK.ID.eq(RENTAL.BOOK_ID))
+            .where(BOOK.ID.eq(id))
+            .fetchOne(::toBookWithRental)
+
+    private fun toBookWithRental(record: Record): BookWithRental =
+        BookWithRental(
+            book =
+                Book(
+                    id = record[BOOK.ID]!!,
+                    title = record[BOOK.TITLE]!!,
+                    author = record[BOOK.AUTHOR]!!,
+                    releaseDate = record[BOOK.RELEASE_DATE]!!,
+                ),
+            rental =
+                record[RENTAL.ID]?.let { rentalId ->
+                    Rental(
+                        id = rentalId,
+                        bookId = record[RENTAL.BOOK_ID]!!,
+                        userId = record[RENTAL.USER_ID]!!,
+                        rentalDatetime = record[RENTAL.RENTAL_DATETIME]!!,
+                        returnDeadline = record[RENTAL.RETURN_DEADLINE]!!,
+                    )
+                },
+        )
 }

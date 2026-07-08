@@ -80,7 +80,7 @@ com.shou.demo
   - [x] `usecase/book/FindBookListUsecase.kt`: 全書籍＋貸出状況を取得し `List<BookListItem>` を返す
   - [ ] `usecase/book/FindBookDetailUsecase.kt`: 1件の書籍＋貸出情報を取得（`BookRepository.findByIdWithRental` の追加が前提。一覧取得側を先に完成させてから着手）
 - **Presentation**
-  - [ ] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
+  - [x] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
   - [ ] レスポンス用クラス（`BookListResponse`, `BookListItem`, `BookDetailResponse`, `RentalInfoResponse`）
 
 ### フェーズ2: 更新系機能（登録・更新・削除） `[ ] 未着手`
