@@ -58,14 +58,14 @@ com.shou.demo
 
 | フェーズ | 内容 | 状態 |
 | --- | --- | --- |
-| 1 | 検索系機能（一覧取得・詳細取得） | [ ] 対応中 |
+| 1 | 検索系機能（一覧取得・詳細取得） | [x] 完了 |
 | 2 | 更新系機能（登録・更新・削除） | [ ] 未着手 |
 | 3 | Spring Security による認証・認可 | [ ] 未着手 |
 | 4 | 貸出・返却機能 | [ ] 未着手 |
 | 5 | Spring AOP でログ出力 | [ ] 未着手 |
 | 6 | JUnitで単体テスト | [ ] 未着手 |
 
-### フェーズ1: 検索系機能（一覧取得・詳細取得） `[ ] 対応中`
+### フェーズ1: 検索系機能（一覧取得・詳細取得） `[x] 完了`
 
 認証機構より先に実装するため、この時点では未認証でアクセス可能な状態でよい。
 
@@ -81,7 +81,7 @@ com.shou.demo
   - [x] `usecase/book/FindBookDetailUsecase.kt`: 1件の書籍＋貸出情報を取得（`BookRepository.findByIdWithRental` の追加が前提。一覧取得側を先に完成させてから着手）
 - **Presentation**
   - [x] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
-  - [ ] レスポンス用クラス（`BookListResponse`, `BookListItem`, `BookDetailResponse`, `RentalInfoResponse`）
+  - [x] レスポンス用クラス（`BookListResponse`, `BookListItem`, `BookDetailResponse`, `RentalInfoResponse`）
 
 ### フェーズ2: 更新系機能（登録・更新・削除） `[ ] 未着手`
 
