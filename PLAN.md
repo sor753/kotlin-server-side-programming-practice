@@ -95,8 +95,8 @@ com.shou.demo
 ### フェーズ3: Spring Security による認証・認可 `[ ] 未着手`
 
 - [ ] Redis導入: `docker-compose.yml` に `redis` サービス追加、`build.gradle.kts` に `spring-boot-starter-security`, `spring-session-data-redis`, `spring-boot-starter-data-redis` を追加
-- [ ] **Domain**: `domain/user/User.kt`（`id, email, password, name, roleType`）, `domain/user/RoleType.kt`（`ADMIN`/`USER`）, `domain/user/UserRepository.kt`（`findByEmail(email): User?`）
-- [ ] **Infrastructure**: `infrastructure/user/UserRepositoryImpl.kt`（jOOQ）。Spring Securityの `UserDetailsService` 実装もここ（もしくは `infrastructure/security/` を新設）に配置
+- [x] **Domain**: `domain/user/User.kt`（`id, email, password, name, roleType`）, `domain/user/RoleType.kt`（`ADMIN`/`USER`）, `domain/user/UserRepository.kt`（`findByEmail(email): User?`）
+- [x] **Infrastructure**: `infrastructure/user/UserRepositoryImpl.kt`（jOOQ）。Spring Securityの `UserDetailsService` 実装もここ（もしくは `infrastructure/security/` を新設）に配置
 - [ ] **Usecase**: `usecase/auth/LoginUsecase.kt`（Spring Securityの認証フローに委譲する形が基本のため、必要最小限のラッパーになる想定）
 - [ ] **Presentation**: `presentation/auth/LoginController.kt`（`POST /login`。Spring Securityのフォームログインをそのまま使うか、カスタムフィルタにするかは実装時に決定）
 - [ ] **設定**: Spring Session のセッションストアを Redis に向ける設定（`spring.session.store-type=redis` 等）
