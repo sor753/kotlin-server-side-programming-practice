@@ -83,11 +83,11 @@ com.shou.demo
   - [x] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
   - [x] レスポンス用クラス（`BookListResponse`, `BookListItem`, `BookDetailResponse`, `RentalInfoResponse`）
 
-### フェーズ2: 更新系機能（登録・更新・削除） `[ ] 未着手`
+### フェーズ2: 更新系機能（登録・更新・削除） `[ ] 着手中`
 
 この時点ではまだ権限チェックが無いため、`/admin/*` のパスであっても未認証でアクセス可能な状態になる（フェーズ3で認可を追加するまでの暫定状態）。
 
-- [ ] **Domain**: `BookRepository` に `save(book)`, `update(book)`, `deleteById(id)` を追加
+- [x] **Domain**: `BookRepository` に `save(book)`, `update(book)`, `deleteById(id)` を追加
 - [ ] **Infrastructure**: `BookRepositoryImpl` に対応する jOOQ の `INSERT`/`UPDATE`/`DELETE` を実装
 - [ ] **Usecase**: `RegisterBookUsecase`, `UpdateBookUsecase`, `DeleteBookUsecase`
 - [ ] **Presentation**: `BookController` に `POST /admin/book/register`, `PUT /admin/book/update`, `DELETE /admin/book/delete/{id}` を追加
