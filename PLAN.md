@@ -59,7 +59,7 @@ com.shou.demo
 | フェーズ | 内容 | 状態 |
 | --- | --- | --- |
 | 1 | 検索系機能（一覧取得・詳細取得） | [x] 完了 |
-| 2 | 更新系機能（登録・更新・削除） | [ ] 未着手 |
+| 2 | 更新系機能（登録・更新・削除） | [x] 完了 |
 | 3 | Spring Security による認証・認可 | [ ] 未着手 |
 | 4 | 貸出・返却機能 | [ ] 未着手 |
 | 5 | Spring AOP でログ出力 | [ ] 未着手 |
@@ -83,14 +83,14 @@ com.shou.demo
   - [x] `presentation/book/BookController.kt`: `GET /book/list`, `GET /book/detail/{id}`
   - [x] レスポンス用クラス（`BookListResponse`, `BookListItem`, `BookDetailResponse`, `RentalInfoResponse`）
 
-### フェーズ2: 更新系機能（登録・更新・削除） `[ ] 着手中`
+### フェーズ2: 更新系機能（登録・更新・削除） `[x] 完了`
 
 この時点ではまだ権限チェックが無いため、`/admin/*` のパスであっても未認証でアクセス可能な状態になる（フェーズ3で認可を追加するまでの暫定状態）。
 
-- [x] **Domain**: `BookRepository` に `save(book)`, `update(book)`, `deleteById(id)` を追加
+- [x] **Domain**: `BookRepository` に `save(book)`, `update(id, title?, author?, releaseDate?)`, `deleteById(id)` を追加。`update` はnullが渡されたカラムを更新対象から除外する部分更新方式
 - [x] **Infrastructure**: `BookRepositoryImpl` に対応する jOOQ の `INSERT`/`UPDATE`/`DELETE` を実装
-- [x] **Usecase**: `RegisterBookUsecase`, `UpdateBookUsecase`, `DeleteBookUsecase`
-- [ ] **Presentation**: `BookController` に `POST /admin/book/register`, `PUT /admin/book/update`, `DELETE /admin/book/delete/{id}` を追加
+- [x] **Usecase**: `RegisterBookUsecase`（重複IDは`ConflictException`で409）, `UpdateBookUsecase`, `DeleteBookUsecase`（存在しないIDは`NotFoundException`で404）
+- [x] **Presentation**: `AdminBookController` に `POST /admin/book/register`, `PUT /admin/book/update`, `DELETE /admin/book/delete/{book_id}` を追加
 
 ### フェーズ3: Spring Security による認証・認可 `[ ] 未着手`
 
