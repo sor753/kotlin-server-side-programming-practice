@@ -58,4 +58,31 @@ class JooqBookRepositoryImpl(
                     )
                 },
         )
+
+    override fun save(book: Book) {
+        dsl
+            .insertInto(BOOK)
+            .set(BOOK.ID, book.id)
+            .set(BOOK.TITLE, book.title)
+            .set(BOOK.AUTHOR, book.author)
+            .set(BOOK.RELEASE_DATE, book.releaseDate)
+            .execute()
+    }
+
+    override fun update(book: Book) {
+        dsl
+            .update(BOOK)
+            .set(BOOK.TITLE, book.title)
+            .set(BOOK.AUTHOR, book.author)
+            .set(BOOK.RELEASE_DATE, book.releaseDate)
+            .where(BOOK.ID.eq(book.id))
+            .execute()
+    }
+
+    override fun deleteById(id: Long) {
+        dsl
+            .deleteFrom(BOOK)
+            .where(BOOK.ID.eq(id))
+            .execute()
+    }
 }
