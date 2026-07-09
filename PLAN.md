@@ -89,7 +89,7 @@ com.shou.demo
 
 - [x] **Domain**: `BookRepository` に `save(book)`, `update(book)`, `deleteById(id)` を追加
 - [x] **Infrastructure**: `BookRepositoryImpl` に対応する jOOQ の `INSERT`/`UPDATE`/`DELETE` を実装
-- [ ] **Usecase**: `RegisterBookUsecase`, `UpdateBookUsecase`, `DeleteBookUsecase`
+- [x] **Usecase**: `RegisterBookUsecase`, `UpdateBookUsecase`, `DeleteBookUsecase`
 - [ ] **Presentation**: `BookController` に `POST /admin/book/register`, `PUT /admin/book/update`, `DELETE /admin/book/delete/{id}` を追加
 
 ### フェーズ3: Spring Security による認証・認可 `[ ] 未着手`

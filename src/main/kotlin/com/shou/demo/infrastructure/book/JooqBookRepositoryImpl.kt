@@ -11,6 +11,7 @@ import com.shou.demo.jooq.tables.references.RENTAL
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 // InfrastructureのBean。Domainの BookRepository インターフェースの実装
 @Repository
@@ -69,13 +70,24 @@ class JooqBookRepositoryImpl(
             .execute()
     }
 
-    override fun update(book: Book) {
+    override fun update(
+        id: Long,
+        title: String?,
+        author: String?,
+        releaseDate: LocalDate?,
+    ) {
+        // nullが渡されたカラムは更新対象から除外する（NOT NULL制約への違反を防ぐため）
+        val values =
+            buildMap {
+                title?.let { put(BOOK.TITLE, it) }
+                author?.let { put(BOOK.AUTHOR, it) }
+                releaseDate?.let { put(BOOK.RELEASE_DATE, it) }
+            }
+        if (values.isEmpty()) return
         dsl
             .update(BOOK)
-            .set(BOOK.TITLE, book.title)
-            .set(BOOK.AUTHOR, book.author)
-            .set(BOOK.RELEASE_DATE, book.releaseDate)
-            .where(BOOK.ID.eq(book.id))
+            .set(values)
+            .where(BOOK.ID.eq(id))
             .execute()
     }
 

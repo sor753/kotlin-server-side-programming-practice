@@ -1,5 +1,6 @@
 package com.shou.demo.presentation.config
 
+import com.shou.demo.domain.exception.ConflictException
 import com.shou.demo.domain.exception.NotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -19,4 +20,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFound(e: NotFoundException): Map<String, String?> = mapOf("message" to e.message)
+
+    @ExceptionHandler(ConflictException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun handleConflict(e: ConflictException): Map<String, String?> = mapOf("message" to e.message)
 }
