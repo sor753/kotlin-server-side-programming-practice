@@ -7,6 +7,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 // アプリ全体のCORS設定。各Controllerに@CrossOriginを個別に付ける代わりに、
 // ここで一括設定することで、Controllerを追加するたびの設定漏れを防ぐ
 //
+// [注意] Spring Security導入後は、このクラスは実質的に参照されない。
+// Spring Securityのフィルターチェーンが全リクエストを先に処理するため、
+// CORSは SecurityConfig.kt の HttpSecurity.cors()（corsConfigurationSource()）が
+// 唯一有効な設定になっている。このクラスは削除せず参考として残しているだけなので、
+// CORSの挙動を変えたいときは SecurityConfig.kt 側を修正すること。
+//
 // @Configuration: このクラスがSpringのBean定義クラスであることを示す。
 // コンポーネントスキャン対象になり、Springが起動時にこのクラスをBeanとして登録する
 //
