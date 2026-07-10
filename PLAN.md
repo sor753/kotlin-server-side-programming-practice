@@ -60,7 +60,7 @@ com.shou.demo
 | --- | --- | --- |
 | 1 | 検索系機能（一覧取得・詳細取得） | [x] 完了 |
 | 2 | 更新系機能（登録・更新・削除） | [x] 完了 |
-| 3 | Spring Security による認証・認可 | [ ] 未着手 |
+| 3 | Spring Security による認証・認可 | [ ] 対応中（Redis導入のみ残り） |
 | 4 | 貸出・返却機能 | [ ] 未着手 |
 | 5 | Spring AOP でログ出力 | [ ] 未着手 |
 | 6 | JUnitで単体テスト | [ ] 未着手 |
@@ -92,15 +92,16 @@ com.shou.demo
 - [x] **Usecase**: `RegisterBookUsecase`（重複IDは`ConflictException`で409）, `UpdateBookUsecase`, `DeleteBookUsecase`（存在しないIDは`NotFoundException`で404）
 - [x] **Presentation**: `AdminBookController` に `POST /admin/book/register`, `PUT /admin/book/update`, `DELETE /admin/book/delete/{book_id}` を追加
 
-### フェーズ3: Spring Security による認証・認可 `[ ] 未着手`
+### フェーズ3: Spring Security による認証・認可 `[ ] 対応中`
 
-- [ ] Redis導入: `docker-compose.yml` に `redis` サービス追加、`build.gradle.kts` に `spring-boot-starter-security`, `spring-session-data-redis`, `spring-boot-starter-data-redis` を追加
+`POST /login` はSpring Securityの `formLogin()` がフィルターレベルで直接処理するため、**`LoginUsecase`/`LoginController` は作成しなかった**（Presentation/Usecase層に「ログイン」という独立した処理は存在せず、`SecurityConfig`＋`BookManagerUserDetailsService`＋`presentation/handler/*` で完結する）。
+
+- [ ] Redis導入: `docker-compose.yml` に `redis` サービス追加、`build.gradle.kts` に `spring-session-data-redis`, `spring-boot-starter-data-redis` を追加。現状はSpring Bootのデフォルト（インメモリ）セッションで動作確認済み
 - [x] **Domain**: `domain/user/User.kt`（`id, email, password, name, roleType`）, `domain/user/RoleType.kt`（`ADMIN`/`USER`）, `domain/user/UserRepository.kt`（`findByEmail(email): User?`）
-- [x] **Infrastructure**: `infrastructure/user/UserRepositoryImpl.kt`（jOOQ）。Spring Securityの `UserDetailsService` 実装もここ（もしくは `infrastructure/security/` を新設）に配置
-- [ ] **Usecase**: `usecase/auth/LoginUsecase.kt`（Spring Securityの認証フローに委譲する形が基本のため、必要最小限のラッパーになる想定）
-- [ ] **Presentation**: `presentation/auth/LoginController.kt`（`POST /login`。Spring Securityのフォームログインをそのまま使うか、カスタムフィルタにするかは実装時に決定）
-- [ ] **設定**: Spring Session のセッションストアを Redis に向ける設定（`spring.session.store-type=redis` 等）
-- [ ] **認可**: `/admin/**` はADMINロール限定にする認可ルールを追加（フェーズ2で暫定的に無認可だった `/admin/*` を保護する）
+- [x] **Infrastructure**: `infrastructure/user/JooqUserRepositoryImpl.kt`（jOOQ）, `infrastructure/security/BookManagerUserDetailsService.kt`（Spring Securityの `UserDetailsService` 実装）
+- [x] **Presentation**: `presentation/config/SecurityConfig.kt`（`SecurityFilterChain`, CORS設定）, `presentation/handler/`（`BookManagerAuthenticationSuccessHandler`/`FailureHandler`/`AuthenticationEntryPoint`/`AccessDeniedHandler`）
+- [ ] **設定**: Spring Session のセッションストアを Redis に向ける設定（`spring.session.store-type=redis` 等）。Redis導入と合わせて対応
+- [x] **認可**: `/admin/**` はADMINロール限定、それ以外は認証済みユーザーのみ。ログイン成功/失敗（200/401）、未認証アクセス（401）、権限不足（403）、ADMIN権限での成功（200）を実際にcurlで動作確認済み
 
 ### フェーズ4: 貸出・返却機能 `[ ] 未着手`
 
