@@ -60,7 +60,7 @@ com.shou.demo
 | --- | --- | --- |
 | 1 | 検索系機能（一覧取得・詳細取得） | [x] 完了 |
 | 2 | 更新系機能（登録・更新・削除） | [x] 完了 |
-| 3 | Spring Security による認証・認可 | [ ] 対応中（Redis導入のみ残り） |
+| 3 | Spring Security による認証・認可 | [x] 完了 |
 | 4 | 貸出・返却機能 | [ ] 未着手 |
 | 5 | Spring AOP でログ出力 | [ ] 未着手 |
 | 6 | JUnitで単体テスト | [ ] 未着手 |
@@ -92,16 +92,17 @@ com.shou.demo
 - [x] **Usecase**: `RegisterBookUsecase`（重複IDは`ConflictException`で409）, `UpdateBookUsecase`, `DeleteBookUsecase`（存在しないIDは`NotFoundException`で404）
 - [x] **Presentation**: `AdminBookController` に `POST /admin/book/register`, `PUT /admin/book/update`, `DELETE /admin/book/delete/{book_id}` を追加
 
-### フェーズ3: Spring Security による認証・認可 `[ ] 対応中`
+### フェーズ3: Spring Security による認証・認可 `[x] 完了`
 
 `POST /login` はSpring Securityの `formLogin()` がフィルターレベルで直接処理するため、**`LoginUsecase`/`LoginController` は作成しなかった**（Presentation/Usecase層に「ログイン」という独立した処理は存在せず、`SecurityConfig`＋`BookManagerUserDetailsService`＋`presentation/handler/*` で完結する）。
 
-- [ ] Redis導入: `docker-compose.yml` に `redis` サービス追加、`build.gradle.kts` に `spring-session-data-redis`, `spring-boot-starter-data-redis` を追加。現状はSpring Bootのデフォルト（インメモリ）セッションで動作確認済み
+- [x] Redis導入: `docker-compose.yml` に `redis` サービス追加（`redis:7.0`, 名前付きボリューム, `container_name: redis`）。`build.gradle.kts` には `spring-boot-starter-data-redis`（`RedisConnectionFactory`等の基本自動構成）と `spring-boot-starter-session-data-redis`（HttpSessionをRedisに保存する自動構成）の**両方**が必要だった（このSpring Bootバージョンは技術ごとに自動構成モジュールが細分化されており、片方だけでは機能しなかった）
 - [x] **Domain**: `domain/user/User.kt`（`id, email, password, name, roleType`）, `domain/user/RoleType.kt`（`ADMIN`/`USER`）, `domain/user/UserRepository.kt`（`findByEmail(email): User?`）
 - [x] **Infrastructure**: `infrastructure/user/JooqUserRepositoryImpl.kt`（jOOQ）, `infrastructure/security/BookManagerUserDetailsService.kt`（Spring Securityの `UserDetailsService` 実装）
 - [x] **Presentation**: `presentation/config/SecurityConfig.kt`（`SecurityFilterChain`, CORS設定）, `presentation/handler/`（`BookManagerAuthenticationSuccessHandler`/`FailureHandler`/`AuthenticationEntryPoint`/`AccessDeniedHandler`）
-- [ ] **設定**: Spring Session のセッションストアを Redis に向ける設定（`spring.session.store-type=redis` 等）。Redis導入と合わせて対応
-- [x] **認可**: `/admin/**` はADMINロール限定、それ以外は認証済みユーザーのみ。ログイン成功/失敗（200/401）、未認証アクセス（401）、権限不足（403）、ADMIN権限での成功（200）を実際にcurlで動作確認済み
+- [x] **設定**: `application.yaml` に `spring.data.redis.host/port` を設定。`spring.session.store-type` はこのバージョンでは廃止されたプロパティ（ストア種別は依存関係の有無で決まる）だったため設定不要と判明し削除
+- [x] **シードデータ修正**: `V2__seed.sql` のパスワードが平文だったため、`V4__hash_user_passwords.sql` でBCryptハッシュ値に置き換え
+- [x] **認可**: `/admin/**` はADMINロール限定、それ以外は認証済みユーザーのみ。ログイン成功/失敗（200/401）、未認証アクセス（401）、権限不足（403）、ADMIN権限での成功（200）、Redisへのセッション保存（`spring:session:sessions:*`キー）を実際にcurl/redis-cliで動作確認済み
 
 ### フェーズ4: 貸出・返却機能 `[ ] 未着手`
 
