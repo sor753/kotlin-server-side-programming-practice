@@ -1,6 +1,7 @@
 package com.shou.demo.infrastructure.security
 import com.shou.demo.domain.user.RoleType
 import com.shou.demo.domain.user.User
+import com.shou.demo.domain.user.UserRepository
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.UserDetails
@@ -8,13 +9,13 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
 class BookManagerUserDetailsService(
-    private val authenticationUsecase: AuthenticationUsecase,
+    private val userRepository: UserRepository,
 ) : UserDetailsService {
     // loadUserByUsername: ユーザー名（この場合はメールアドレス）をもとにユーザー情報を取得し、UserDetailsとして返す
     // loadUserByUsername で取得した UserDetails 型のオブジェクトを使用して、パスワードの比較や認可処理をフレームワーク側で自動で行う
     override fun loadUserByUsername(username: String): UserDetails {
         val user =
-            authenticationUsecase.findUser(username)
+            userRepository.findByEmail(username)
                 ?: throw UsernameNotFoundException("User not found: $username")
         return BookManagerUserDetails(user)
     }
