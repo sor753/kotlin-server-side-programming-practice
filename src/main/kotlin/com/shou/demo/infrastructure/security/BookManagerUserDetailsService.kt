@@ -31,7 +31,8 @@ data class BookManagerUserDetails(
     constructor(user: User) : this(user.id, user.email, user.password, user.roleType)
 
     // 権限の取得（複数の権限を保持することも可能）。認可が必要なパスの場合、この関数で取得した権限の情報でチェックされる
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = AuthorityUtils.createAuthorityList(this.roleType.toString())
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> =
+        AuthorityUtils.createAuthorityList(this.roleType.toString())
 
     override fun isEnabled(): Boolean = true
 

@@ -1,0 +1,7 @@
+root = true
+
+[*.{kt,kts}]
+# detektのデフォルト(MaxLineLength)と揃えることで、ktlintとdetektが行長について
+# 同じ基準で判断するようにする。揃っていないと、detektで指摘された長い行を改行しても
+# ktlintFormatが「改行の必要が無い」と判断して1行に戻してしまう
+max_line_length = 120
