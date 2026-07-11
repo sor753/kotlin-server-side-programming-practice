@@ -2,7 +2,6 @@ package com.shou.demo.usecase.rental
 
 import com.shou.demo.domain.book.BookRepository
 import com.shou.demo.domain.exception.ConflictException
-import com.shou.demo.domain.exception.NotFoundException
 import com.shou.demo.domain.rental.RentalRepository
 import com.shou.demo.domain.user.UserRepository
 import org.springframework.stereotype.Service
@@ -22,8 +21,8 @@ class RentalStartUsecase(
         bookId: Long,
         userId: Long,
     ) {
-        findUserOrThrow(userId)
-        val book = findBookOrThrow(bookId)
+        userRepository.findUserOrThrow(userId)
+        val book = bookRepository.findBookOrThrow(bookId)
 
         if (book.isRental) {
             throw ConflictException("書籍はすでに貸出中です：$bookId")
@@ -38,10 +37,4 @@ class RentalStartUsecase(
             returnDeadline = returnDeadLine,
         )
     }
-
-    private fun findUserOrThrow(userId: Long) =
-        userRepository.findById(userId) ?: throw NotFoundException("該当するユーザーが存在しません：$userId")
-
-    private fun findBookOrThrow(bookId: Long) =
-        bookRepository.findByIdWithRental(bookId) ?: throw NotFoundException("該当する書籍が存在しません：$bookId")
 }

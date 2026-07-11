@@ -18,8 +18,8 @@ class RentalEndUsecase(
         bookId: Long,
         userId: Long,
     ) {
-        findUserOrThrow(userId)
-        val book = findBookOrThrow(bookId)
+        userRepository.findUserOrThrow(userId)
+        val book = bookRepository.findBookOrThrow(bookId)
 
         if (!book.isRental) {
             throw NotFoundException("書籍は貸出中ではありません：$bookId")
@@ -30,10 +30,4 @@ class RentalEndUsecase(
 
         rentalRepository.endRental(bookId)
     }
-
-    private fun findUserOrThrow(userId: Long) =
-        userRepository.findById(userId) ?: throw NotFoundException("該当するユーザーが存在しません：$userId")
-
-    private fun findBookOrThrow(bookId: Long) =
-        bookRepository.findByIdWithRental(bookId) ?: throw NotFoundException("該当する書籍が存在しません：$bookId")
 }
