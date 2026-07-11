@@ -61,7 +61,7 @@ com.shou.demo
 | 1 | 検索系機能（一覧取得・詳細取得） | [x] 完了 |
 | 2 | 更新系機能（登録・更新・削除） | [x] 完了 |
 | 3 | Spring Security による認証・認可 | [x] 完了 |
-| 4 | 貸出・返却機能 | [ ] 未着手 |
+| 4 | 貸出・返却機能 | [x] 完了 |
 | 5 | Spring AOP でログ出力 | [ ] 未着手 |
 | 6 | JUnitで単体テスト | [ ] 未着手 |
 
@@ -104,14 +104,15 @@ com.shou.demo
 - [x] **シードデータ修正**: `V2__seed.sql` のパスワードが平文だったため、`V4__hash_user_passwords.sql` でBCryptハッシュ値に置き換え
 - [x] **認可**: `/admin/**` はADMINロール限定、それ以外は認証済みユーザーのみ。ログイン成功/失敗（200/401）、未認証アクセス（401）、権限不足（403）、ADMIN権限での成功（200）、Redisへのセッション保存（`spring:session:sessions:*`キー）を実際にcurl/redis-cliで動作確認済み
 
-### フェーズ4: 貸出・返却機能 `[ ] 未着手`
+### フェーズ4: 貸出・返却機能 `[x] 完了`
 
 貸出中の判定は「返却時にレコードを削除し、レコードが存在する＝貸出中」という方式で確定済み（`BookWithRental(rental: Rental?)` の設計を参照）。
 
-- [ ] **Domain**: `domain/rental/RentalRepository.kt` を新規作成し `save(rental)`, `deleteByBookId(bookId)` を定義
-- [ ] **Infrastructure**: `RentalRepositoryImpl` に対応する実装を追加
-- [ ] **Usecase**: `StartRentalUsecase`（ログイン中ユーザーIDを使って貸出登録。返却期限の計算ルールも実装）, `EndRentalUsecase`
-- [ ] **Presentation**: `presentation/rental/RentalController.kt`: `POST /rental/start`, `DELETE /rental/end/{id}`
+- [x] **Domain**: `domain/rental/RentalRepository.kt`: `startRental(bookId, userId, rentalDatetime, returnDeadline)`, `endRental(bookId)`。`startRental`は当初 `Rental` オブジェクトを引数に取る設計だったが、`id`（DBの`AUTO_INCREMENT`で決まり呼び出し時点では存在しない）にダミー値を渡す必要が生じて不自然だったため、実際に必要な個別フィールドを直接渡す形に変更した
+- [x] **Infrastructure**: `infrastructure/rental/JooqRentalRepositoryImpl.kt`（`startRental`はINSERT、`endRental`は`DELETE FROM rental WHERE book_id = ?`）
+- [x] **Usecase**: `usecase/rental/RentalStartUsecase.kt`（返却期限は貸出日+14日で計算）, `usecase/rental/RentalEndUsecase.kt`（貸出中でない書籍・本人以外が借りている書籍への返却操作はどちらも`NotFoundException`で404とし、他人の貸出情報の存在を隠す）。書き込み系Usecaseとして他と統一するため両方に`@Transactional`を付与
+- [x] **Presentation**: `presentation/rental/RentalController.kt`: `POST /rental/start`, `DELETE /rental/end/{book_id}`。ログイン中ユーザーIDの取得は`@AuthenticationPrincipal`で`BookManagerUserDetails`を注入する方式に統一
+- [x] curl での動作確認済み（貸出登録→DB反映、返却→DB反映、二重返却で404、他人の貸出への返却操作で404）
 
 ### フェーズ5: Spring AOP でログ出力 `[ ] 未着手`
 
@@ -124,8 +125,8 @@ com.shou.demo
 ## 決定事項
 
 - **貸出状態の判定方法**: 返却時に該当 `rental` レコードを `DELETE` し、「レコードが存在する＝貸出中」とする方式に決定（`domain/book/BookWithRental.kt` の `rental: Rental?` として実装済み）
+- **返却期限の算出ルール**: AGENTS.mdに明記されていなかったため、貸出日+14日（`RentalStartUsecase.RENTAL_TERM_DAYS`）に決定
 
 ## 要検討事項（実装時に判断が必要）
 
-- **返却期限の算出ルール**: `return_deadline` をどう計算するか（例: 貸出日+2週間など）がAGENTS.mdに明記されていない
 - **ログインの失敗時レスポンス**: フロントエンド側は失敗時のハンドリングをしていない（`then`のみ）ため、エラー時のステータスコード等は実装側で自由に決めてよい

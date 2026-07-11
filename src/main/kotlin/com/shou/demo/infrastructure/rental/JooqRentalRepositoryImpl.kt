@@ -24,4 +24,11 @@ class JooqRentalRepositoryImpl(
             .set(RENTAL.RETURN_DEADLINE, returnDeadline)
             .execute()
     }
+
+    override fun endRental(bookId: Long) {
+        dsl
+            .deleteFrom(RENTAL)
+            .where(RENTAL.BOOK_ID.eq(bookId))
+            .execute()
+    }
 }

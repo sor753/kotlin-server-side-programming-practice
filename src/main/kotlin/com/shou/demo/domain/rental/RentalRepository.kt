@@ -9,4 +9,6 @@ interface RentalRepository {
         rentalDatetime: LocalDateTime,
         returnDeadline: LocalDateTime,
     )
+
+    fun endRental(bookId: Long)
 }

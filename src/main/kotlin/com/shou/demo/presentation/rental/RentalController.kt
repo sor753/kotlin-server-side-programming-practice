@@ -1,8 +1,11 @@
 package com.shou.demo.presentation.rental
 
 import com.shou.demo.infrastructure.security.BookManagerUserDetails
+import com.shou.demo.usecase.rental.RentalEndUsecase
 import com.shou.demo.usecase.rental.RentalStartUsecase
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("rental")
 class RentalController(
-    private val rentalUsecase: RentalStartUsecase,
+    private val rentalStartUsecase: RentalStartUsecase,
+    private val rentalEndUsecase: RentalEndUsecase,
 ) {
     @PostMapping("/start")
     fun startRental(
@@ -21,6 +25,14 @@ class RentalController(
         // 手動で SecurityContextHolder を取得してキャストする必要がない
         @AuthenticationPrincipal user: BookManagerUserDetails,
     ) {
-        rentalUsecase.execute(request.bookId, user.id)
+        rentalStartUsecase.execute(request.bookId, user.id)
+    }
+
+    @DeleteMapping("/end/{book_id}")
+    fun endRental(
+        @PathVariable("book_id") bookId: Long,
+        @AuthenticationPrincipal user: BookManagerUserDetails,
+    ) {
+        rentalEndUsecase.execute(bookId, user.id)
     }
 }
