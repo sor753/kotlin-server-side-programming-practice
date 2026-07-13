@@ -51,6 +51,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("tools.jackson.module:jackson-module-kotlin")
 	implementation("redis.clients:jedis")
+	implementation("org.aspectj:aspectjweaver:1.9.25")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	jooqGenerator("com.mysql:mysql-connector-j")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
