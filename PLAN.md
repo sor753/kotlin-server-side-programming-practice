@@ -62,7 +62,7 @@ com.shou.demo
 | 2 | 更新系機能（登録・更新・削除） | [x] 完了 |
 | 3 | Spring Security による認証・認可 | [x] 完了 |
 | 4 | 貸出・返却機能 | [x] 完了 |
-| 5 | Spring AOP でログ出力 | [ ] 未着手 |
+| 5 | Spring AOP でログ出力 | [x] 完了 |
 | 6 | JUnitで単体テスト | [ ] 未着手 |
 
 ### フェーズ1: 検索系機能（一覧取得・詳細取得） `[x] 完了`
@@ -114,9 +114,14 @@ com.shou.demo
 - [x] **Presentation**: `presentation/rental/RentalController.kt`: `POST /rental/start`, `DELETE /rental/end/{book_id}`。ログイン中ユーザーIDの取得は`@AuthenticationPrincipal`で`BookManagerUserDetails`を注入する方式に統一
 - [x] curl での動作確認済み（貸出登録→DB反映、返却→DB反映、二重返却で404、他人の貸出への返却操作で404）
 
-### フェーズ5: Spring AOP でログ出力 `[ ] 未着手`
+### フェーズ5: Spring AOP でログ出力 `[x] 完了`
 
-- [ ] `com.shou.demo.usecase..*` を対象にしたポイントカットで、各Usecaseの実行前後（開始・終了・例外）をログ出力する `Aspect` クラスを `infrastructure`（もしくは横断的関心事として別途 `com.shou.demo.aop` 等）に実装
+`spring-boot-starter-aop`はこのSpring Bootバージョンには存在しない（Maven Central上で404）ため、`org.aspectj:aspectjweaver`を直接依存に追加する形で代替した（`spring-aop`自体は他の依存経由ですでに解決済みだったため、不足していたのは`aspectjweaver`のみ）。
+
+- [x] **Domain/Infrastructure/Usecase**: 変更なし
+- [x] **横断的関心事**: `com.shou.demo.aop.LoggingAdvice`（4層のどこにも属さない独立パッケージとして配置。ポイントカット式は文字列であり`usecase`への実際のコード依存ではないため、オニオンの依存方向ルールには抵触しない）。`@Before`/`@After`/`@Around`/`@AfterReturning`/`@AfterThrowing`を使い分けて`com.shou.demo.usecase..*`の開始・終了・戻り値・例外をログ出力
+- [x] `com.shou.demo.aop.AuthenticationExtensions.kt`: `Authentication?.asBookManagerUserDetails(): BookManagerUserDetails?` という拡張関数を切り出し、`LoggingAdvice`内での`SecurityContextHolder`からのユーザー取得を安全なキャスト（`as?`）に統一
+- [x] 実際にアプリを起動し、`/book/list`呼び出し時に`FindBookListUsecase.execute()`の開始・終了ログとuserId・セッションIDが出力されることを確認済み
 
 ### フェーズ6: JUnitで単体テスト `[ ] 未着手`
 
